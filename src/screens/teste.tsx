@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, Alert, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, Alert, TouchableOpacity, Dimensions, Modal } from 'react-native'; // --- NOVO: Modal ---
 import * as MediaLibrary from 'expo-media-library';
-
-// --- NOVO: Imports de Navegação e Contexto ---
-import { useNavigation } from '@react-navigation/native';
-import { useProducts } from '../context/ProductContext'; // <-- Ajuste o caminho se necessário
+import { AntDesign } from '@expo/vector-icons'; // Para o ícone de fechar o modal
 
 // Pega o tamanho da tela para calcular o tamanho das imagens
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window'); // --- NOVO: Pega a altura também
 const imageSize = width / 3; // 3 colunas
 
 export default function GalleryListScreen() {
   const [permission, requestPermission] = MediaLibrary.usePermissions();
   const [assets, setAssets] = useState<MediaLibrary.Asset[]>([]);
 
-  // --- NOVO: Hooks de Navegação e Contexto ---
-  const navigation = useNavigation();
-  const { setTempImageUri } = useProducts(); // Pega a função do contexto
+  // --- NOVO: Estado para a imagem selecionada no modal ---
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
 
   useEffect(() => {
     const loadAssets = async () => {
@@ -40,20 +36,20 @@ export default function GalleryListScreen() {
     loadAssets();
   }, [requestPermission]);
 
-  // --- NOVO: Função para lidar com a seleção ---
-  const handleImageSelect = (uri: string) => {
-    // 1. Envia a URI para o contexto
-    setTempImageUri(uri);
-    // 2. Fecha a tela da galeria (o modal)
-    navigation.goBack(); 
-  };
-
-  // Telas de loading (igual)
   if (!permission) {
-    return <View style={styles.container}><Text style={styles.message}>Solicitando permissão...</Text></View>;
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>Solicitando permissão...</Text>
+      </View>
+    );
   }
+
   if (!permission.granted) {
-    return <View style={styles.container}><Text style={styles.message}>Permissão à galeria negada.</Text></View>;
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>Permissão à galeria negada.</Text>
+      </View>
+    );
   }
 
   return (
@@ -64,7 +60,7 @@ export default function GalleryListScreen() {
         numColumns={3}
         renderItem={({ item }) => (
           <TouchableOpacity 
-            onPress={() => handleImageSelect(item.uri)} // --- MUDANÇA: Chama a nova função
+            onPress={() => setSelectedImageUri(item.uri)} // --- NOVO: Abre o modal
           >
             <Image
               source={{ uri: item.uri }}
@@ -74,14 +70,36 @@ export default function GalleryListScreen() {
         )}
         ListEmptyComponent={<Text style={styles.message}>Nenhuma foto encontrada.</Text>}
       />
-      
-      {/* O MODAL FOI REMOVIDO DAQUI */}
+
+      {/* --- NOVO: Componente Modal para a Imagem Maior --- */}
+      <Modal
+        animationType="fade" // Efeito de transição
+        transparent={true}  // Para ver o fundo escurecido
+        visible={!!selectedImageUri} // O modal só é visível se houver uma URI selecionada
+        onRequestClose={() => setSelectedImageUri(null)} // Fecha ao apertar "voltar" do Android
+      >
+        <View style={styles.modalBackground}>
+          <TouchableOpacity 
+            style={styles.closeModalButton}
+            onPress={() => setSelectedImageUri(null)} // Fecha o modal
+          >
+            <AntDesign name="close-circle" size={30} color="white" />
+          </TouchableOpacity>
+
+          {selectedImageUri && ( // Renderiza a imagem só se tiver uma URI
+            <Image
+              source={{ uri: selectedImageUri }}
+              style={styles.fullScreenImage}
+              resizeMode="contain" // Garante que a imagem inteira seja visível
+            />
+          )}
+        </View>
+      </Modal>
     </View>
   );
 }
 
 // --- ESTILOS ---
-// (Os estilos do Modal foram removidos por não serem mais necessários)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -100,5 +118,24 @@ const styles = StyleSheet.create({
     height: imageSize,
     borderWidth: 1,
     borderColor: '#fff',
+  },
+
+  // --- NOVOS ESTILOS PARA O MODAL ---
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.9)', // Fundo escuro transparente
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeModalButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 1, // Garante que o botão fique acima da imagem
+    padding: 10,
+  },
+  fullScreenImage: {
+    width: width,  // Ocupa toda a largura da tela
+    height: height * 0.8, // Ocupa 80% da altura para deixar espaço para o botão
   },
 });
