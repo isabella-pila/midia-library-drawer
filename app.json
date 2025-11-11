@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "midia-library",
+    "slug": "midia-library",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "O app precisa de acesso à sua câmera para tirar fotos."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "O app precisa de acesso às suas fotos para salvar a imagem.",
+          "savePhotosPermission": true,
+          "isAccessToAllPhotos": true
+        }
+      ]
+    ],
+    
+
+    "ios": {
+      "supportsTablet": true,
+     
+      "infoPlist": {
+        "NSCameraUsageDescription": "O app precisa de acesso à sua câmera para tirar fotos.",
+        "NSPhotoLibraryUsageDescription": "O app precisa de acesso às suas fotos para salvar a imagem."
+      }
+      
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+      
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
