@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 // O navegador de Abas
 import { MainDrawerNavigator } from '../navigations/MainDrawerNavigation';
 
-import medialibraryCameraScreen_WithSave from '../screens/mediaLibraryGalleryScreen';
+import medialibraryCameraScreen_WithSave from '../screens/mediaLibraryTirarFotoScreen';
 import AdvancedGalleryScreen from '../screens/AdvancedGalleryScreen';
 import GalleryListScreen from '../screens/GalleryListScreen';
 export type RootStackParamList = {
